@@ -23,19 +23,37 @@
 - **Response** (JSON):
   ```json
   {
-    "nodes": [
-      {
-        "type": "TITLE",
-        "content": null,
-        "x": null,
-        "y": null,
-        "width": null,
-        "height": null,
-        "z_index": 1
-      }
-    ]
+    "page1": {
+      "nodes": [
+        {
+          "category": "Title",
+          "importance": 0.1,
+          "text_length": 0.2,
+          "aspect_ratio": 5.0,
+          "reading_order": 0,
+          "has_paragraph": 1,
+          "tree_depth": 0,
+          "children_count": 0
+        }
+      ]
+    },
+    "page2": {
+      "nodes": [
+        {
+          "category": "Section-header",
+          "importance": 0.05,
+          "text_length": 0.3,
+          "aspect_ratio": 4.0,
+          "reading_order": 1,
+          "has_paragraph": 1,
+          "tree_depth": 0,
+          "children_count": 2
+        }
+      ]
+    }
   }
   ```
+  *(참고: GNN 모델이 물리적 좌표를 예측할 수 있도록, 기존의 `x, y, w, h = null` 대신 8차원의 논리적 구조 특성 피처를 반환합니다.)*
 
 #### 사용자 입력 최적화
 

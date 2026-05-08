@@ -15,20 +15,33 @@ def generate_layout_nodes(topic: str):
 You are an expert document layout designer. Based on the following document topic, generate a logical document structure layout.
 Topic: {topic}
 
-Return ONLY a JSON object with a "nodes" key. The "nodes" array should contain elements representing layout areas for the document.
-Allowed types: Title, Section-header, Picture, Table, Formula, Text, List-item, Caption, Footnote
-
-Since a separate GNN model will handle the positioning and sizing, you MUST set x, y, width, and height to null for every node.
-Also, set content to null for every node.
-Each node must have: type, content (null), x (null), y (null), width (null), height (null), z_index (int).
+Return ONLY a JSON object representing the logical layout structure for the document, grouped by pages.
+Use keys like "page1", "page2" for each page, and under each page key, provide a "nodes" array containing the layout elements.
+A downstream Graph Neural Network (GNN) will use these features to predict the exact physical coordinates (x, y, w, h).
+Therefore, for each node, you MUST provide the following 8 properties instead of physical coordinates:
+1. "category": String. Allowed values: Title, Section-header, Picture, Table, Formula, Text, List-item, Caption, Footnote, Header, Footer
+2. "importance": Float (0.0 ~ 1.0). The expected relative visual area this node should take compared to the whole document.
+3. "text_length": Float (0.0 ~ 1.0). The normalized expected text length (0 for non-text).
+4. "aspect_ratio": Float. The expected aspect ratio (Width / Height).
+5. "reading_order": Integer. The sequence order in the document (0, 1, 2, ...).
+6. "has_paragraph": Integer. 1 if the node contains paragraph text, 0 otherwise.
+7. "tree_depth": Integer. The depth in the logical document hierarchy (e.g., Document root=0, Title=1, Text=2).
+8. "children_count": Integer. The expected number of child nodes under this node in the hierarchy.
 
 Format strictly as JSON. No markdown backticks, no explanations.
 Example:
 {{
-  "nodes": [
-    {{"type": "Title", "content": null, "x": null, "y": null, "width": null, "height": null, "z_index": 1}},
-    {{"type": "Section-header", "content": null, "x": null, "y": null, "width": null, "height": null, "z_index": 1}}
-  ]
+  "page1": {{
+    "nodes": [
+      {{"category": "Title", "importance": 0.1, "text_length": 0.2, "aspect_ratio": 5.0, "reading_order": 0, "has_paragraph": 1, "tree_depth": 0, "children_count": 0}},
+      {{"category": "Text", "importance": 0.2, "text_length": 0.8, "aspect_ratio": 1.0, "reading_order": 1, "has_paragraph": 1, "tree_depth": 1, "children_count": 0}}
+    ]
+  }},
+  "page2": {{
+    "nodes": [
+      {{"category": "Section-header", "importance": 0.05, "text_length": 0.3, "aspect_ratio": 4.0, "reading_order": 2, "has_paragraph": 1, "tree_depth": 0, "children_count": 2}}
+    ]
+  }}
 }}
 """
     try:
@@ -44,7 +57,7 @@ Example:
             available_models = [m.name for m in client.models.list() if "gemini" in m.name.lower()]
             
     except Exception as e:
-        return {"nodes": [], "error": f"모델 목록 조회 실패: {str(e.code)}"}
+        return {"error": f"모델 목록 조회 실패: {str(e.code)}"}
     
     # 2. 모델 순회
     for model_name in available_models:
@@ -71,4 +84,4 @@ Example:
             continue
             
     # 4. 모든 모델 시도 실패 시
-    return {"nodes": [], "error": "모든 가용 모델이 응답에 실패했습니다."}
+    return {"error": "모든 가용 모델이 응답에 실패했습니다."}
