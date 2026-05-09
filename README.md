@@ -33,7 +33,8 @@
           "reading_order": 0,
           "has_paragraph": 1,
           "tree_depth": 0,
-          "children_count": 0
+          "children_count": 0,
+          "box": [0.1, 0.05, 0.8, 0.1]
         }
       ]
     },
@@ -47,13 +48,14 @@
           "reading_order": 1,
           "has_paragraph": 1,
           "tree_depth": 0,
-          "children_count": 2
+          "children_count": 2,
+          "box": [0.1, 0.05, 0.5, 0.05]
         }
       ]
     }
   }
   ```
-  *(참고: GNN 모델이 물리적 좌표를 예측할 수 있도록, 기존의 `x, y, w, h = null` 대신 8차원의 논리적 구조 특성 피처를 반환합니다.)*
+  *(참고: GNN 모델이 물리적 좌표를 더 정교하게 예측할 수 있도록, LLM이 8차원의 구조적 속성뿐 아니라 대략적인 초기 좌표인 `box` 예측값을 함께 반환합니다. GNN의 총 입력 노드 피처는 20차원입니다.)*
 
 #### 사용자 입력 최적화
 
