@@ -30,6 +30,8 @@ class Node(Base):
     doc_id = Column(String(36), ForeignKey("documents.doc_id"))
     category = Column(String(50))
     page_number = Column(Integer)
+    reading_order = Column(Integer, nullable=True)
+    text_length = Column(Numeric(10, 4), nullable=True)
     x = Column(Numeric(10, 4))
     y = Column(Numeric(10, 4))
     width = Column(Numeric(10, 4))

@@ -76,6 +76,8 @@ def create_layout(request: LayoutRequest, db: Session = Depends(get_db)):
         for node in page_data.get("nodes", []):
             box = pred_map.get(id_counter, [0.0, 0.0, 0.0, 0.0])
             category = node.get("category", "Text")
+            reading_order = node.get("reading_order", id_counter)
+            text_length = node.get("text_length", 0.0)
             
             # 역정규화 (픽셀 좌표로 변환)
             x_px = int(box[0] * request.canvas_width)
@@ -90,6 +92,8 @@ def create_layout(request: LayoutRequest, db: Session = Depends(get_db)):
                 doc_id=doc_id,
                 category=category,
                 page_number=page_num,
+                reading_order=reading_order,
+                text_length=text_length,
                 x=x_px,
                 y=y_px,
                 width=w_px,
@@ -142,9 +146,21 @@ def optimize_layout(doc_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="해당 문서에 연결된 노드가 없습니다. 먼저 레이아웃을 생성하세요.")
 
     # Step 2: LLM 호출 — 노드별 콘텐츠 생성
+    sorted_nodes = sorted(nodes, key=lambda n: (n.page_number, n.reading_order or 0))
+
     node_dicts = [
-        {"node_id": n.node_id, "category": n.category, "page": n.page_number}
-        for n in nodes
+        {
+            "node_id":       n.node_id,
+            "category":      n.category,
+            "page":          n.page_number,
+            "reading_order": n.reading_order or 0,
+            "text_length":   float(n.text_length) if n.text_length else 0.0,
+            "x":             int(n.x),
+            "y":             int(n.y),
+            "w":             int(n.width),
+            "h":             int(n.height),
+        }
+        for n in sorted_nodes
     ]
     original_content = source.content if source else ""
     llm_result = generate_content_for_nodes(doc.topic, original_content, node_dicts)

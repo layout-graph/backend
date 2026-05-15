@@ -179,6 +179,8 @@
 - `doc_id` : 소속 보고서
 - `type` :노드 타입(Title, Text ...)
 - `page_number` : 소속 페이지 
+- `reading_order`: 읽기 순서
+- `text_length` : 예상 텍스트 길이
 - `x` : 생성된 x좌표
 - `y` : 생성된 y좌표
 - `w`  : 생성된 width 크기

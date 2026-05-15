@@ -61,7 +61,9 @@ def content_for_nodes_prompt(topic: str, original_content: str, nodes: list) -> 
     Args:
         topic: 문서 주제
         original_content: 원본 텍스트 (DocumentSource.content)
-        nodes: [{"node_id": str, "category": str, "page": int}, ...]
+        nodes: [{"node_id": str, "category": str, "page": int,
+                 "reading_order": int, "text_length": float,
+                 "x": int, "y": int, "w": int, "h": int}, ...]
 
     Returns:
         완성된 프롬프트 문자열
@@ -77,19 +79,45 @@ Document Topic: {topic}
 Original Source Content:
 {original_content}
 
-Layout Nodes (JSON array — each has node_id, category, page):
+Layout Nodes (JSON array — sorted by reading_order):
 {nodes_json}
 
-Generation rules per category:
-- Title          : Concise, impactful document title.
-- Section-header : Clear section heading relevant to the topic.
-- Text           : 2-4 sentences of paragraph text that fits the document flow.
-- List-item      : A single bullet-point item (no leading dash).
-- Caption        : A brief descriptive caption (1 sentence).
-- Footnote       : A short footnote or reference note.
-- Table          : A plain-text representation of a small relevant table.
-- Formula        : A formula or equation string.
-- Picture        : A concise image description for visual search (e.g. "bar chart showing quarterly revenue growth").
+=== LAYOUT-AWARE GENERATION RULES ===
+
+1. READING ORDER FLOW
+   Nodes are sorted by reading_order (0 = first).
+   Content MUST flow logically: earlier nodes introduce context,
+   later nodes build on or conclude it. Maintain narrative coherence across pages.
+
+2. BOX SIZE AWARENESS
+   w, h are pixel dimensions of each box.
+   Small boxes (w*h < 30000) → concise, headline-like text.
+   Medium boxes (30000 ~ 100000) → 1-2 sentences.
+   Large boxes (w*h > 100000) → 2-4 detailed sentences.
+   NEVER generate text that would overflow the given box dimensions.
+
+3. POSITION AWARENESS
+   x, y are pixel positions (origin = top-left, canvas = 794×1123).
+   Low y → near top of page → introductory or heading content.
+   High y → near bottom → concluding or supplementary content.
+   Large w × h → prominent block → place key information here.
+
+4. EXPECTED TEXT LENGTH
+   text_length indicates the expected normalized text length (0.0 ~ 1.0).
+   Low text_length (< 0.2) → short text, such as a title or heading.
+   High text_length (> 0.5) → longer text, such as a full paragraph.
+   Use this as a guide for how much content to generate for each node.
+
+5. CATEGORY-SPECIFIC RULES
+   - Title          : Concise, impactful document title.
+   - Section-header : Clear section heading relevant to the topic.
+   - Text           : Paragraph text fitting the document flow and box size.
+   - List-item      : A single bullet-point item (no leading dash or bullet).
+   - Caption        : A brief descriptive caption (1 sentence).
+   - Footnote       : A short footnote or reference note.
+   - Table          : A plain-text representation of a small relevant table.
+   - Formula        : A formula or equation string.
+   - Picture        : A concise image description for visual search (e.g. "bar chart showing quarterly revenue growth").
 
 Return ONLY a flat JSON object where:
 - Each KEY is the node_id string.
