@@ -1,9 +1,9 @@
 
-# 0. ARCHITECTURE
+# ARCHITECTURE
 
 > 데이터 + 주제 입력 -> 레이아웃 생성 ->  렌더링 -> 최적화 -> 렌더링
 
-# 1. API
+# API
 
 | **HTTP Method** | **URL Path**                        | **기능 설명**                                |
 | --------------- | ----------------------------------- | ---------------------------------------- |
@@ -62,7 +62,7 @@
 
 > 레이아웃 확정 후 LLM/CLIP 기반 최종 콘텐츠 최적화
 
-- method : GET
+- method : POST
 - url : `/api/documents/opimize/{doc_id}`
 
 
@@ -139,7 +139,7 @@
 - method : GET
 - url : /api/documents/export/{doc_id}
 
-# 2. DATABASE
+# DATABASE
 
 ![[스크린샷 2026-04-28 오후 11.20.04.png]]
 *위 사진과과 실제 구현 테이블이 살짝씩 다름*
