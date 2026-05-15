@@ -168,15 +168,18 @@ def optimize_layout(doc_id: str, db: Session = Depends(get_db)):
     if "error" in llm_result:
         raise HTTPException(status_code=502, detail=f"LLM 콘텐츠 생성 실패: {llm_result['error']}")
 
-    # Step 3: contents 테이블에 저장
+    # Step 3: contents 테이블에 저장 (UPSERT — 기존 있으면 UPDATE, 없으면 INSERT)
     for node in nodes:
         content_body = llm_result.get(node.node_id, "")
-        db_content = Content(
-            content_id=str(uuid.uuid4()),
-            node_id=node.node_id,
-            content_body=content_body,
-        )
-        db.add(db_content)
+        existing = db.query(Content).filter(Content.node_id == node.node_id).first()
+        if existing:
+            existing.content_body = content_body
+        else:
+            db.add(Content(
+                content_id=str(uuid.uuid4()),
+                node_id=node.node_id,
+                content_body=content_body,
+            ))
 
     # Document 상태 업데이트
     doc.status = "OPTIMIZED"

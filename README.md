@@ -60,7 +60,7 @@
 
 #### 사용자 입력 최적화
 
-> 레이아웃 확정 후 LLM/CLIP 기반 최종 콘텐츠 최적화
+> 레이아웃 확정 후 LLM/CLIP 기반 최종 콘텐츠 최적화, 이미 생성되어있는 경우 업데이트
 
 - method : POST
 - url : `/api/documents/opimize/{doc_id}`
