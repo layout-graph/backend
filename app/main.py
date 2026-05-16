@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from app.api.endpoints import documents
 from app.core.database import engine
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
     print("👋 애플리케이션 종료")
 
 app = FastAPI(title="Backend API", lifespan=lifespan)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # 엔드포인트 라우터 등록
 app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
