@@ -2,7 +2,6 @@ import os
 import sys
 import glob
 import torch
-import torch.nn as nn
 
 # model/ 패키지를 import하기 위한 경로 설정
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))

@@ -89,35 +89,44 @@ Layout Nodes (JSON array — sorted by reading_order):
    Content MUST flow logically: earlier nodes introduce context,
    later nodes build on or conclude it. Maintain narrative coherence across pages.
 
-2. BOX SIZE AWARENESS
+2. BOX SIZE AWARENESS — NON-TEXT CATEGORIES (Title, Section-header, List-item, Caption, Footnote, Table, Formula, Picture)
    w, h are pixel dimensions of each box.
-   Small boxes (w*h < 30000) → concise, headline-like text.
-   Medium boxes (30000 ~ 100000) → 1-2 sentences.
-   Large boxes (w*h > 100000) → 2-4 detailed sentences.
+   For all categories EXCEPT "Text", estimate text amount CONSERVATIVELY based on box area:
+   Small boxes (w*h < 30000) → very short: a single phrase or a few words only.
+   Medium boxes (30000 ~ 100000) → 1 short sentence at most.
+   Large boxes (w*h > 100000) → 1-2 concise sentences maximum.
+   Always leave comfortable visual margins; do NOT try to fill the box.
    NEVER generate text that would overflow the given box dimensions.
 
-3. POSITION AWARENESS
+3. BOX SIZE AWARENESS — TEXT CATEGORY
+   For "Text" nodes, MAXIMIZE content to fill the box as fully as possible.
+   Estimate the box capacity in characters: approximate capacity ≈ (w / 7) * (h / 18) characters (assuming ~7px per char width, ~18px per line height).
+   Small boxes (w*h < 30000) → 1-2 dense sentences that fill the space.
+   Medium boxes (30000 ~ 100000) → 2-4 detailed sentences, use the full area.
+   Large boxes (w*h > 100000) → Write a full, rich paragraph. Pack as much meaningful content as possible without exceeding the box.
+   The goal is to leave minimal empty whitespace inside "Text" boxes.
+
+4. POSITION AWARENESS
    x, y are pixel positions (origin = top-left, canvas = 794×1123).
    Low y → near top of page → introductory or heading content.
    High y → near bottom → concluding or supplementary content.
    Large w × h → prominent block → place key information here.
 
-4. EXPECTED TEXT LENGTH
+5. EXPECTED TEXT LENGTH
    text_length indicates the expected normalized text length (0.0 ~ 1.0).
-   Low text_length (< 0.2) → short text, such as a title or heading.
-   High text_length (> 0.5) → longer text, such as a full paragraph.
-   Use this as a guide for how much content to generate for each node.
+   For "Text" nodes: use this as a MINIMUM target — aim to reach or exceed it.
+   For all other categories: use this as a MAXIMUM guide — stay at or below it.
 
-5. CATEGORY-SPECIFIC RULES
-   - Title          : Concise, impactful document title.
-   - Section-header : Clear section heading relevant to the topic.
-   - Text           : Paragraph text fitting the document flow and box size.
-   - List-item      : A single bullet-point item (no leading dash or bullet).
-   - Caption        : A brief descriptive caption (1 sentence).
-   - Footnote       : A short footnote or reference note.
-   - Table          : A plain-text representation of a small relevant table.
-   - Formula        : A formula or equation string.
-   - Picture        : A concise image description for visual search (e.g. "bar chart showing quarterly revenue growth").
+6. CATEGORY-SPECIFIC RULES
+   - Title          : Concise, impactful document title. Keep short even in large boxes.
+   - Section-header : Clear section heading relevant to the topic. Brief and punchy.
+   - Text           : Dense paragraph text that FILLS the box. Maximize content richness and detail to occupy all available space.
+   - List-item      : A single bullet-point item (no leading dash or bullet). Keep concise.
+   - Caption        : A brief descriptive caption (1 short sentence max).
+   - Footnote       : A short footnote or reference note. Minimal text.
+   - Table          : A plain-text representation of a small relevant table. Size to box conservatively.
+   - Formula        : A formula or equation string. Compact.
+   - Picture        : A concise image description for visual search (e.g. "bar chart showing quarterly revenue growth"). Keep brief.
 
 Return ONLY a flat JSON object where:
 - Each KEY is the node_id string.
